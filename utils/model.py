@@ -63,3 +63,10 @@ class NormalizeElementFractions(InputTransform,Module):
         """
         norm_factor = torch.sum(X[:,self.indices], axis=1)
         return X[:,self.indices]/norm_factor[:,None]
+
+def test_EF_normalized(model, X_train, indices,eps=1e-5):
+    X_train_mod = X_train.detach().clone()
+    X_train_mod[:,indices] = 2*X_train_mod[:,indices]
+    y_train_predicted1, y_train_stddev1 = evaluateGP(model, X_train_mod)
+    y_train_predicted2, y_train_stddev2 = evaluateGP(model, X_train)
+    return np.sum(y_train_predicted2-y_train_predicted1) < eps
