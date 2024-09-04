@@ -1,65 +1,58 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+
 class surrogate_model:
-    def __init__(self, name):
+    def __init__(self, name, df):
         self.name = name
         if self.name == 'Bs':
-            self._label = 'Bs (T)'
+            self.label = 'Bs (T)'
         if self.name == 'Tc':
             self.label = 'Tc (K)'
-        self.df = None,  # Initialize the 'df' property with a default value
-        self.model = None,  # Initialize the 'model' property with a default value
+        self.df = df  # Initialize the 'df' property with a default value
+        self.model = None  # Initialize the 'model' property with a default value
         self.to_scale_col = None
         self.EF_col = None
+        self.original_df = None
+        self.cleaned_up = False
         #self. = None,  # Initialize the 'name' property with a default value
 
-    @property
-    def df(self):
-        return self.df
-    
-    @property
-    def model(self):
-        return self.model
+    # # getter method 
+    # def df(self): 
+    #     return self.df 
+      
+    # # setter method 
+    # def set_df(self, x): 
+    #     self._age = x 
 
-    @df.setter
-    def df(self, value: pd.Dataframe):
-        self.df = value
-    )
-    
-    @model.setter
-    def model(self, value):
-        self.model = value
-    )
-
-    def cleanup_df(self, drop_NaN = False, drop_col_with_NaN = True):
-        if not self.df:
-            print("Df is not assigned.")
-            return
+    def cleanup_df(self, drop_NaN = False, drop_col_with_NaN = True):    
+        #backup
+        if self.original_df is not None: 
+            self.df = self.original_df.copy()
+        else:
+            self.original_df = self.df.copy()
         
         if drop_NaN:
-            self.df = df.dropna()
+            self.df = self.df.dropna()
         if drop_col_with_NaN:
             #currently hardcoded but can be changed 
-            self.df = df.drop(['Annealing Time (s)',
-                               'Annealing Temperature (K)'
-                              ], axis =1)
+            self.df = self.df.drop([
+                'Annealing Time (s)',
+                'Annealing Temperature (K)'
+                ], axis =1)
 
-    def split_train_test():
-        if not self.df:
-            print("Df is not assigned.")
-            return
-            
-        X = df.drop([label, 
-                     'composition',
-                     'formula',
+    def split_train_test(self,test_size, seed):
+        X = self.df.drop([
+            self.label, 
+            'composition',
+            'formula',
                     ], axis =1)
-        y = df[label]
+        y = self.df[self.label]
         X_train, X_test, y_train, y_test = train_test_split(
             X.values,                                                
             y.values, 
-            test_size=0.2,
-            random_state=1
+            test_size=test_size,
+            random_state=seed
         )
         self.X_train = X_train
         self.X_test = X_test
