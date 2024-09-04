@@ -5,6 +5,11 @@ from torch import Tensor
 from torch.nn import Module 
 import numpy as np
 
+tkwargs = {
+    "dtype": torch.double,
+    "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+}
+
 def trainGP(model, mll, optimizer, num_epochs, print_interval =100):
     #num_epochs = 3000
     for epoch in range(num_epochs):
@@ -34,7 +39,7 @@ def evaluateGP(model, X):
     model.eval()
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
         # compute posterior
-        posterior = model.posterior(torch.tensor(X, dtype=torch.double))
+        posterior = model.posterior(torch.tensor(X, **tkwargs))
     return posterior.mean.squeeze().numpy(), posterior.stddev.numpy()
 
 def should_normalize(t, eps=1e-6):

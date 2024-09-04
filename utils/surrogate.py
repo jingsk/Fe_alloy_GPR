@@ -11,11 +11,42 @@ class surrogate_model:
             self.label = 'Tc (K)'
         self.df = df  # Initialize the 'df' property with a default value
         self.model = None  # Initialize the 'model' property with a default value
-        self.to_scale_col = None
-        self.EF_col = None
         self.original_df = None
         #self. = None,  # Initialize the 'name' property with a default value
-    
+    @property
+    def X(self):
+        return self.df.drop([
+            self.label, 
+            'composition',
+            'formula',
+        ], axis =1).values
+
+    @property
+    def y(self):
+        return self.df[self.label].values
+
+    @property
+    def to_scale_col(self):
+        X = self.df.drop([
+            self.label, 
+            'composition',
+            'formula',
+        ], axis =1)
+        #index 0 is the idx but it's not present in value
+        return [i for i, col in enumerate(X) if col in [
+            'Annealing Time (s)',
+            'Annealing Temperature (K)',
+            'Thickness (mu m)']]
+        #index 0 is the idx but it's not present in value
+    @property
+    def EF_col(self):
+        X = self.df.drop([
+            self.label, 
+            'composition',
+            'formula',
+        ], axis =1)
+        return [i for i in range(X.shape[1]) if i not in self.to_scale_col]
+        
     def cleanup_df(self, drop_NaN = False, drop_col_with_NaN = True):    
         #backup
         if self.original_df is not None: 
@@ -36,15 +67,9 @@ class surrogate_model:
         self.model = model
         
     def split_train_test(self,test_size, seed):
-        X = self.df.drop([
-            self.label, 
-            'composition',
-            'formula',
-                    ], axis =1)
-        y = self.df[self.label]
         X_train, X_test, y_train, y_test = train_test_split(
-            X.values,                                                
-            y.values, 
+            self.X,                                                
+            self.y, 
             test_size=test_size,
             random_state=seed
         )
@@ -52,15 +77,6 @@ class surrogate_model:
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
-
-
-        #index 0 is the idx but it's not present in value
-        self.to_scale_col = [i for i, col in enumerate(X) if col in [
-            'Annealing Time (s)',
-            'Annealing Temperature (K)',
-            'Thickness (mu m)']]
-        #index 0 is the idx but it's not present in value
-        self.EF_col = [i for i in range(X.shape[1]) if i not in self.to_scale_col]
 
     def test_invariance(self):
         from .model import test_features_normalized
