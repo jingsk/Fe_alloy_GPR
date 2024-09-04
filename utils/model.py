@@ -41,7 +41,7 @@ def should_normalize(t, eps=1e-6):
     return torch.max(t) - torch.min(t) > eps
 
 def normalize_to_0_1(t, eps=1e-6):
-    return (t - torch.min(t)) / (torch.max(t) - torch.min(t) + eps)
+    return (t - torch.min(t)) / (torch.max(t) - torch.min(t))
 
 class NormalizeFeatures(InputTransform,Module):
     def __init__(
@@ -69,11 +69,7 @@ class NormalizeFeatures(InputTransform,Module):
         #check torch.normalize
         for idx in self.indices:
             if should_normalize(X[:,idx]):
-                #print('normalizing')
                 X[:,idx] = normalize_to_0_1(X[:,idx])
-            #print(X)
-            #print(torch.min(X[:,idx]))
-            #print(torch.max(X[:,idx]))
         return X
 
 class NormalizeElementFractions(InputTransform,Module):
