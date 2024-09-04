@@ -15,11 +15,15 @@ class surrogate_model:
         #self. = None,  # Initialize the 'name' property with a default value
     @property
     def X(self):
-        return self.df.drop([
-            self.label, 
-            'composition',
-            'formula',
-        ], axis =1).values
+        try:
+            return self.df.drop([
+                self.label, 
+                'composition',
+                'formula',
+            ], axis =1).values
+        except KeyError:
+            return self.df.values
+        
 
     @property
     def y(self):
@@ -27,11 +31,14 @@ class surrogate_model:
 
     @property
     def to_scale_col(self):
-        X = self.df.drop([
-            self.label, 
-            'composition',
-            'formula',
-        ], axis =1)
+        try:
+            X = self.df.drop([
+                self.label, 
+                'composition',
+                'formula',
+            ], axis =1)
+        except KeyError:
+            X =self.df
         #index 0 is the idx but it's not present in value
         return [i for i, col in enumerate(X) if col in [
             'Annealing Time (s)',
@@ -40,11 +47,14 @@ class surrogate_model:
         #index 0 is the idx but it's not present in value
     @property
     def EF_col(self):
-        X = self.df.drop([
-            self.label, 
-            'composition',
-            'formula',
-        ], axis =1)
+        try:
+            X = self.df.drop([
+                self.label, 
+                'composition',
+                'formula',
+            ], axis =1)
+        except KeyError:
+            X =self.df
         return [i for i in range(X.shape[1]) if i not in self.to_scale_col]
         
     def cleanup_df(self, drop_NaN = False, drop_col_with_NaN = True):    
