@@ -34,30 +34,33 @@ def trainGP(model, mll, optimizer, num_epochs, print_interval =100):
             )
         optimizer.step()
 
-def trainGPList(model, mll, optimizer, num_epochs, print_interval =100):
-    #num_epochs = 3000
-    for epoch in range(num_epochs):
-        # clear gradients
-        optimizer.zero_grad()
-        # forward pass through the model to obtain the output MultivariateNormal
-        training_set = [torch.tensor(X[0], **tkwargs) for X in model.train_inputs]
-        output = model(torch.stack(training_set, dim=-1))
-        # Compute negative marginal log likelihood
-        try:
-            loss = - mll(output, model.train_targets)
-        except:
-            print("[{}] Couldn't train".format(epoch),flush=True)
-            break
-        # back prop gradients
-        loss.backward()
-        # print every X iterations
-        if True and ((epoch + 1) % print_interval == 0):
-            print(
-                f"Epoch {epoch+1:>3}/{num_epochs} - Loss: {loss.item():>4.3f} "
-                # f"lengthscale: {model.covar_module.base_kernel.lengthscale.item():>4.3f} " 
-                f"noise: {model.likelihood.noise.item():>4.3f}"
-            )
-        optimizer.step()
+# def trainGPList(model, mll, optimizer, num_epochs, print_interval =100):
+#     #num_epochs = 3000
+#     for model, mll
+#     for epoch in range(num_epochs):
+#         # clear gradients
+#         optimizer.zero_grad()
+#         # forward pass through the model to obtain the output MultivariateNormal
+#         training_set = [torch.tensor(X[0], **tkwargs) for X in model.train_inputs]
+#         training_set = torch.stack(training_set, dim=-1)
+#         print(training_set.shape)
+#         output = model(training_set)
+#         # Compute negative marginal log likelihood
+#         try:
+#             loss = - mll(output, model.train_targets)
+#         except:
+#             print("[{}] Couldn't train".format(epoch),flush=True)
+#             break
+#         # back prop gradients
+#         loss.backward()
+#         # print every X iterations
+#         if True and ((epoch + 1) % print_interval == 0):
+#             print(
+#                 f"Epoch {epoch+1:>3}/{num_epochs} - Loss: {loss.item():>4.3f} "
+#                 # f"lengthscale: {model.covar_module.base_kernel.lengthscale.item():>4.3f} " 
+#                 f"noise: {model.likelihood.noise.item():>4.3f}"
+#             )
+#         optimizer.step()
 
 
 def evaluateGP(model, X):
