@@ -24,7 +24,7 @@ def trainGP(model, mll, optimizer, num_epochs, print_interval =100):
             print("[{}] Couldn't train".format(epoch),flush=True)
             break
         # back prop gradients
-        loss.backward()
+        loss.backward(retain_graph=True)
         # print every X iterations
         if True and ((epoch + 1) % print_interval == 0):
             print(
@@ -99,11 +99,11 @@ class NormalizeFeatures(InputTransform,Module):
         Returns:
             A `batch_shape x n x d`-dim tensor of transformed inputs.
         """
-        #check torch.normalize
+        X_transformed = X.detach().clone()
         for idx in self.indices:
-            if should_normalize(X[:,idx]):
-                X[:,idx] = normalize_to_0_1(X[:,idx])
-        return X
+            if should_normalize(X_transformed[...,idx]):
+                X_transformed[...,idx] = normalize_to_0_1(X_transformed[...,idx])
+        return X_transformed
 
 class NormalizeElementFractions(InputTransform,Module):
     def __init__(
@@ -129,9 +129,17 @@ class NormalizeElementFractions(InputTransform,Module):
             A `batch_shape x n x d`-dim tensor of transformed inputs.
         """
         #check torch.normalize
-        norm_factor = torch.sum(X[:,self.indices], axis=1)
-        X[:, self.indices] = X[:, self.indices]/norm_factor[:,None]
-        return X
+        #print(X.shape)
+        X_transformed = X.detach().clone()
+        if X_transformed.dim() ==2:
+            X_transformed[:,self.indices] -= torch.tensor(np.min(X_transformed.numpy(),axis=1).repeat(X_transformed.shape[1]).reshape(-1,X_transformed.shape[1]), **tkwargs)[:,self.indices]
+            norm_factor = torch.sum(X_transformed[:,self.indices], axis=1)
+            X_transformed[:, self.indices] = X_transformed[:, self.indices]/norm_factor[:,None]
+        # if X_transformed.dim() ==3:
+        #     norm_factor = torch.sum(X_transformed[:,:,self.indices], axis=-1)
+        #     X_transformed[:, :, self.indices] = X_transformed[:, :, self.indices]/norm_factor[:,:,None]
+        
+        return X_transformed
 
 def test_features_normalized(model, indices,eps=1e-5):
     X = model.train_inputs[0]

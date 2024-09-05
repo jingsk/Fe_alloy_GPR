@@ -13,6 +13,19 @@ class surrogate_model:
         self.model = None  # Initialize the 'model' property with a default value
         self.original_df = None
         #self. = None,  # Initialize the 'name' property with a default value
+
+    @property
+    def X_label(self):
+        try:
+            return self.df.drop([
+                self.label, 
+                'composition',
+                'formula',
+            ], axis =1).columns
+        except KeyError:
+            return self.df.columns
+        
+    
     @property
     def X(self):
         try:
@@ -57,7 +70,10 @@ class surrogate_model:
             X =self.df
         return [i for i in range(X.shape[1]) if i not in self.to_scale_col]
         
-    def cleanup_df(self, drop_NaN = False, drop_col_with_NaN = True):    
+    def cleanup_df(self, 
+                   drop_NaN = False, 
+                   drop_col_with_NaN = True,
+                   drop_formula_composition = False):    
         #backup
         if self.original_df is not None: 
             self.df = self.original_df.copy()
@@ -71,6 +87,12 @@ class surrogate_model:
             self.df = self.df.drop([
                 'Annealing Time (s)',
                 'Annealing Temperature (K)'
+                ], axis =1)
+        if drop_formula_composition:
+            #currently hardcoded but can be changed 
+            self.df = self.df.drop([
+                'composition',
+                'formula'
                 ], axis =1)
 
     def set_model(self, model):
