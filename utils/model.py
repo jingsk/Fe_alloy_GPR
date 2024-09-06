@@ -6,8 +6,9 @@ from torch.nn import Module
 import numpy as np
 
 tkwargs = {
-    "dtype": torch.double,
+    "dtype": torch.float,
     "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+    #"device": torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"),
 }
 
 def trainGP(model, mll, optimizer, num_epochs, print_interval =100):
@@ -99,7 +100,7 @@ class NormalizeFeatures(InputTransform,Module):
         Returns:
             A `batch_shape x n x d`-dim tensor of transformed inputs.
         """
-        X_transformed = X.detach().clone()
+        X_transformed = X.detach().clone().to(tkwargs["device"])
         for idx in self.indices:
             if should_normalize(X_transformed[...,idx]):
                 X_transformed[...,idx] = normalize_to_0_1(X_transformed[...,idx])
@@ -130,7 +131,7 @@ class NormalizeElementFractions(InputTransform,Module):
         """
         #check torch.normalize
         #print(X.shape)
-        X_transformed = X.detach().clone()
+        X_transformed = X.detach().clone().to(tkwargs["device"])
         if X_transformed.dim() ==2:
             X_transformed[:,self.indices] -= torch.tensor(np.min(X_transformed.numpy(),axis=1).repeat(X_transformed.shape[1]).reshape(-1,X_transformed.shape[1]), **tkwargs)[:,self.indices]
             norm_factor = torch.sum(X_transformed[:,self.indices], axis=1)
@@ -143,7 +144,7 @@ class NormalizeElementFractions(InputTransform,Module):
 
 def test_features_normalized(model, indices,eps=1e-5):
     X = model.train_inputs[0]
-    X_mod = X.clone().detach()
+    X_mod = X.clone().detach().device()
     X_mod[:,indices] = 2*X_mod[:,indices]
     y_predicted1, y_train_stddev1 = evaluateGP(model, X_mod)
     y_predicted2, y_train_stddev2 = evaluateGP(model, X)
