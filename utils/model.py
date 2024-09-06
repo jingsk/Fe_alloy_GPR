@@ -6,7 +6,7 @@ from torch.nn import Module
 import numpy as np
 
 tkwargs = {
-    "dtype": torch.float,
+    "dtype": torch.double,
     "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
     #"device": torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"),
 }
@@ -69,7 +69,7 @@ def evaluateGP(model, X):
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
         # compute posterior
         posterior = model.posterior(torch.tensor(X, **tkwargs))
-    return posterior.mean.squeeze().numpy(), posterior.stddev.numpy()
+    return posterior.mean.squeeze().numpy(), posterior.stddev.squeeze().numpy()
 
 def should_normalize(t, eps=1e-6):
     return torch.max(t) - torch.min(t) > eps
