@@ -1,5 +1,6 @@
 import pandas as pd
 from utils import add_feature
+import numpy as np
 
 def featurize_data(df,load_existing_df=False, pkl_path=None):
     if load_existing_df:
