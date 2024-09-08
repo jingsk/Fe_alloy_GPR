@@ -144,7 +144,7 @@ class NormalizeElementFractions(InputTransform,Module):
 
 def test_features_normalized(model, indices,eps=1e-5):
     X = model.train_inputs[0]
-    X_mod = X.clone().detach().device()
+    X_mod = X.clone().detach()
     X_mod[:,indices] = 2*X_mod[:,indices]
     y_predicted1, y_train_stddev1 = evaluateGP(model, X_mod)
     y_predicted2, y_train_stddev2 = evaluateGP(model, X)
