@@ -73,7 +73,9 @@ class surrogate_model:
     def cleanup_df(self, 
                    drop_NaN = False, 
                    drop_col_with_NaN = True,
-                   drop_formula_composition = False):    
+                   drop_formula_composition = False,
+                   drop_thickness=False
+                  ):    
         #backup
         if self.original_df is not None: 
             self.df = self.original_df.copy()
@@ -87,6 +89,10 @@ class surrogate_model:
             self.df = self.df.drop([
                 'Annealing Time (s)',
                 'Annealing Temperature (K)'
+                ], axis =1)
+        if drop_thickness:
+            self.df = self.df.drop([
+                'Thickness (mu m)'
                 ], axis =1)
         if drop_formula_composition:
             #currently hardcoded but can be changed 
