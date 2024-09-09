@@ -4,6 +4,8 @@ from botorch.models.transforms.input import InputTransform
 from torch import Tensor
 from torch.nn import Module 
 import numpy as np
+from torch.optim import Adam
+from gpytorch.mlls.sum_marginal_log_likelihood import ExactMarginalLogLikelihood
 
 tkwargs = {
     "dtype": torch.double,
@@ -11,7 +13,21 @@ tkwargs = {
     #"device": torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"),
 }
 
-def trainGP(model, mll, optimizer, num_epochs, print_interval =100):
+def train_model(model, lr):
+    #optimizer_kwargs = {'lr': 1e-2, 'weight_decay': 1e-3}
+    optimizer_kwargs = {'lr': lr, 'weight_decay': 1e-3}
+    #print(f"Training {model}")
+    #surrogate_model.model.train()
+    _trainGP(model,
+             mll = ExactMarginalLogLikelihood(model.likelihood, model), 
+             optimizer = Adam([{'params': model.parameters()}], **optimizer_kwargs),
+             num_epochs=200,
+             print_interval = 50 
+            )
+    print("-------------------")
+
+
+def _trainGP(model, mll, optimizer, num_epochs, print_interval =100):
     #num_epochs = 3000
     for epoch in range(num_epochs):
         # clear gradients
@@ -34,35 +50,6 @@ def trainGP(model, mll, optimizer, num_epochs, print_interval =100):
                 f"noise: {model.likelihood.noise.item():>4.3f}"
             )
         optimizer.step()
-
-# def trainGPList(model, mll, optimizer, num_epochs, print_interval =100):
-#     #num_epochs = 3000
-#     for model, mll
-#     for epoch in range(num_epochs):
-#         # clear gradients
-#         optimizer.zero_grad()
-#         # forward pass through the model to obtain the output MultivariateNormal
-#         training_set = [torch.tensor(X[0], **tkwargs) for X in model.train_inputs]
-#         training_set = torch.stack(training_set, dim=-1)
-#         print(training_set.shape)
-#         output = model(training_set)
-#         # Compute negative marginal log likelihood
-#         try:
-#             loss = - mll(output, model.train_targets)
-#         except:
-#             print("[{}] Couldn't train".format(epoch),flush=True)
-#             break
-#         # back prop gradients
-#         loss.backward()
-#         # print every X iterations
-#         if True and ((epoch + 1) % print_interval == 0):
-#             print(
-#                 f"Epoch {epoch+1:>3}/{num_epochs} - Loss: {loss.item():>4.3f} "
-#                 # f"lengthscale: {model.covar_module.base_kernel.lengthscale.item():>4.3f} " 
-#                 f"noise: {model.likelihood.noise.item():>4.3f}"
-#             )
-#         optimizer.step()
-
 
 def evaluateGP(model, X):
     model.eval()

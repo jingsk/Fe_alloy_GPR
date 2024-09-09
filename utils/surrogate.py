@@ -118,8 +118,8 @@ class surrogate_model:
 
     def test_invariance(self):
         from .model import test_features_normalized
-        print('Model {} is invariance to scaling non-ratio features: {}'.format(
-            self.name, test_features_normalized(self.model, indices = self.to_scale_col)))
+        # print('Model {} is invariance to scaling non-ratio features: {}'.format(
+        #     self.name, test_features_normalized(self.model, indices = self.to_scale_col)))
         print('Model {} is invariance to scaling elemental fractions: {}'.format(
             self.name, test_features_normalized(self.model, indices = self.EF_col)))
         
@@ -138,7 +138,7 @@ class surrogate_model:
             print(f"{l} R2 = {linregress(y_true, y_pred).rvalue**2: .03f}")
             print(f'{l} RMSE = {np.sqrt(mean_squared_error(y_true,y_pred)):.3f}')
 
-    def plot_train_test_fit(self):
+    def plot_train_test_fit(self, save_fig = True):
         import matplotlib.pyplot as plt
         from .model import evaluateGP
         import matplotlib.ticker as plticker
