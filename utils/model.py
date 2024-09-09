@@ -13,21 +13,22 @@ tkwargs = {
     #"device": torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"),
 }
 
-def train_model(model, lr):
+def trainGP(model, lr):
     #optimizer_kwargs = {'lr': 1e-2, 'weight_decay': 1e-3}
     optimizer_kwargs = {'lr': lr, 'weight_decay': 1e-3}
     #print(f"Training {model}")
     #surrogate_model.model.train()
-    _trainGP(model,
-             mll = ExactMarginalLogLikelihood(model.likelihood, model), 
-             optimizer = Adam([{'params': model.parameters()}], **optimizer_kwargs),
-             num_epochs=200,
-             print_interval = 50 
-            )
+    _train_GPmodel(
+        model,
+        mll = ExactMarginalLogLikelihood(model.likelihood, model), 
+        optimizer = Adam([{'params': model.parameters()}], **optimizer_kwargs),
+        num_epochs=200,
+        print_interval = 50 
+    )
     print("-------------------")
 
 
-def _trainGP(model, mll, optimizer, num_epochs, print_interval =100):
+def _train_GPmodel(model, mll, optimizer, num_epochs, print_interval =100):
     #num_epochs = 3000
     for epoch in range(num_epochs):
         # clear gradients
