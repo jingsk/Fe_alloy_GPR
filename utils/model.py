@@ -13,7 +13,7 @@ tkwargs = {
     #"device": torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"),
 }
 
-def trainGP(model, lr):
+def trainGP(model, lr=3e-2):
     #optimizer_kwargs = {'lr': 1e-2, 'weight_decay': 1e-3}
     optimizer_kwargs = {'lr': lr, 'weight_decay': 1e-3}
     #print(f"Training {model}")
